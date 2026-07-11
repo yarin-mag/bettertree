@@ -6,14 +6,21 @@ coverage/
 playwright-report/
 test-results/
 *.log
+npm-debug.log*
+*.tsbuildinfo
 
 # Rust / Tauri
 src-tauri/target/
+
+# Local workspace metadata
+.claude/
+.superpowers/
 
 # OS / editor
 .DS_Store
 Thumbs.db
 .vscode/
+.idea/
 
 # Local env/secrets
 .env
