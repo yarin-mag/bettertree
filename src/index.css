@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root[data-theme="dark"] {
+  --bg-canvas: #0d0e13;
+  --bg-surface: #13141b;
+  --bg-elevated: #1b1c25;
+  --bg-hover: #191a22;
+  --border-subtle: #262832;
+  --text-primary: #e3e4ec;
+  --text-muted: #8c8ea0;
+  --accent: #7c6ff0;
+  --accent-contrast: #ffffff;
+  --accent-soft-bg: rgba(124, 111, 240, 0.16);
+  --success: #3ecf8e;
+  --danger: #f0625f;
+  --success-soft-bg: rgba(62, 207, 142, 0.15);
+  --danger-soft-bg: rgba(240, 98, 95, 0.15);
+}
+
+:root[data-theme="light"] {
+  --bg-canvas: #ffffff;
+  --bg-surface: #f9f9fc;
+  --bg-elevated: #f0f0f7;
+  --bg-hover: #f4f4fa;
+  --border-subtle: #e4e4ee;
+  --text-primary: #1c1d29;
+  --text-muted: #676980;
+  --accent: #6555e0;
+  --accent-contrast: #ffffff;
+  --accent-soft-bg: rgba(101, 85, 224, 0.10);
+  --success: #1a9c63;
+  --danger: #d64545;
+  --success-soft-bg: rgba(26, 156, 99, 0.12);
+  --danger-soft-bg: rgba(214, 69, 69, 0.12);
+}
+
+body {
+  margin: 0;
+  background-color: var(--bg-canvas);
+  color: var(--text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.shiki-line pre.shiki {
+  margin: 0;
+  padding: 0;
+  background: transparent !important;
+  overflow: visible;
+}
+.shiki-line pre.shiki code {
+  display: inline;
+}

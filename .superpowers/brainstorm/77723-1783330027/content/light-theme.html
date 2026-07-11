@@ -1,0 +1,51 @@
+<h2>Light theme, same amber accent — how's this?</h2>
+<p class="subtitle">Same layout and accent color, inverted to a clean light surface for the light/dark toggle</p>
+
+<style>
+  .lt-mock { background:#ffffff; border:1px solid #e4e4e7; border-radius:12px; overflow:hidden; font-family:-apple-system,BlinkMacSystemFont,sans-serif; font-size:12px; color:#26272c; box-shadow:0 8px 24px rgba(0,0,0,.08); }
+  .lt-search { padding:8px 12px; border-bottom:1px solid #ececef; background:#fafafa; }
+  .lt-search input { width:100%; background:#f2f2f4; border:1px solid #e4e4e7; border-radius:7px; padding:6px 10px; color:#26272c; font-size:12px; }
+  .lt-toolbar { display:flex; gap:8px; padding:8px 12px; border-bottom:1px solid #ececef; }
+  .lt-btn { padding:5px 12px; border-radius:7px; background:#f2f2f4; border:1px solid #e4e4e7; color:#26272c; font-size:11px; font-weight:500; }
+  .lt-btn.primary { background:#d97a1f; color:#fff; border:none; }
+  .lt-body { display:flex; height:220px; }
+  .lt-sidebar { width:220px; border-right:1px solid #ececef; padding:10px; }
+  .lt-side-label { text-transform:uppercase; font-size:10px; color:#9a9aa3; margin:12px 0 5px; letter-spacing:.06em; font-weight:600; }
+  .lt-side-label:first-child { margin-top:0; }
+  .lt-repo { padding:5px 8px; border-radius:6px; background:#f2f2f4; margin-bottom:2px; }
+  .lt-branch { padding:3px 8px; border-radius:5px; display:flex; align-items:center; gap:6px; }
+  .lt-branch.active { background:rgba(217,122,31,0.1); color:#b5620f; font-weight:600; }
+  .lt-branch .rmt { color:#9a9aa3; }
+  .lt-main { flex:1; padding:10px; }
+  .lt-row { display:flex; align-items:center; gap:8px; padding:5px 4px; border-radius:6px; }
+  .lt-row:hover { background:#f7f7f8; }
+  .lt-dot { width:8px; height:8px; border-radius:50%; background:#d97a1f; flex-shrink:0; box-shadow:0 0 0 3px rgba(217,122,31,0.12); }
+  .lt-row .msg { flex:1; }
+  .lt-row .meta { color:#9a9aa3; font-size:10px; font-family:ui-monospace,monospace; }
+</style>
+
+<div class="mockup" style="max-width:680px;margin:0 auto;">
+  <div class="lt-mock">
+    <div class="lt-search"><input placeholder="Search branches, tags, commits..." readonly></div>
+    <div class="lt-toolbar">
+      <div class="lt-btn">Fetch</div>
+      <div class="lt-btn primary">Pull</div>
+      <div class="lt-btn">Push</div>
+    </div>
+    <div class="lt-body">
+      <div class="lt-sidebar">
+        <div class="lt-side-label">Repos</div>
+        <div class="lt-repo">bettertree</div>
+        <div class="lt-side-label">Branches</div>
+        <div class="lt-branch active">● main</div>
+        <div class="lt-branch rmt">origin/main</div>
+      </div>
+      <div class="lt-main">
+        <div class="lt-row"><div class="lt-dot"></div><span class="msg">second commit</span><span class="meta">a3f9c21 · 2h ago</span></div>
+        <div class="lt-row"><div class="lt-dot" style="opacity:.5;"></div><span class="msg" style="color:#6b6c76;">first commit</span><span class="meta">1c88e0a · 1d ago</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<p class="subtitle">Reply in terminal: good, or adjust.</p>

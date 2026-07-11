@@ -1,0 +1,21 @@
+{
+  "productName": "Bettertree",
+  "version": "0.1.0",
+  "identifier": "ai.cemento.bettertree",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run build",
+    "devUrl": "http://localhost:5173",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "Bettertree",
+        "width": 1200,
+        "height": 800
+      }
+    ]
+  }
+}

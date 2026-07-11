@@ -1,0 +1,86 @@
+<h2>Full app mockup with amber accent — does this read right?</h2>
+<p class="subtitle">Toolbar, sidebar (repos/branches/changes/search), commit graph, and the bottom drawer with diff viewer — all in the dark+amber theme</p>
+
+<style>
+  .full-mock { background:#121316; border:1px solid #26272c; border-radius:12px; overflow:hidden; font-family:-apple-system,BlinkMacSystemFont,sans-serif; font-size:12px; color:#d3d4da; box-shadow:0 8px 30px rgba(0,0,0,.4); }
+  .full-search { padding:8px 12px; border-bottom:1px solid #26272c; background:#17181c; }
+  .full-search input { width:100%; background:#1e1f24; border:1px solid #2c2d33; border-radius:7px; padding:6px 10px; color:#d3d4da; font-size:12px; }
+  .full-toolbar { display:flex; gap:8px; padding:8px 12px; border-bottom:1px solid #26272c; }
+  .full-btn { padding:5px 12px; border-radius:7px; background:#1e1f24; border:1px solid #2c2d33; color:#d3d4da; font-size:11px; font-weight:500; }
+  .full-btn.primary { background:#e8973a; color:#1a1200; border:none; }
+  .full-body { display:flex; height:280px; }
+  .full-sidebar { width:220px; border-right:1px solid #26272c; padding:10px; overflow:hidden; }
+  .full-side-label { text-transform:uppercase; font-size:10px; color:#6f7078; margin:12px 0 5px; letter-spacing:.06em; font-weight:600; }
+  .full-side-label:first-child { margin-top:0; }
+  .full-repo { padding:5px 8px; border-radius:6px; background:#1e1f24; margin-bottom:2px; }
+  .full-branch { padding:3px 8px; border-radius:5px; display:flex; align-items:center; gap:6px; }
+  .full-branch.active { background:rgba(232,151,58,0.12); color:#f0ac57; font-weight:600; }
+  .full-branch .rmt { color:#8a8b93; }
+  .full-change-row { display:flex; justify-content:space-between; align-items:center; padding:3px 8px; }
+  .full-change-row .fname { font-family:ui-monospace,monospace; font-size:11px; }
+  .full-tag-btn { padding:2px 7px; border-radius:5px; font-size:9px; background:#242530; border:1px solid #2c2d33; }
+  .full-main { flex:1; display:flex; flex-direction:column; }
+  .full-graph { flex:1; padding:10px; }
+  .full-row { display:flex; align-items:center; gap:8px; padding:5px 4px; border-radius:6px; }
+  .full-row:hover { background:#1a1b20; }
+  .full-dot { width:8px; height:8px; border-radius:50%; background:#f0ac57; flex-shrink:0; box-shadow:0 0 0 3px rgba(240,172,87,0.15); }
+  .full-row .msg { flex:1; }
+  .full-row .meta { color:#6f7078; font-size:10px; font-family:ui-monospace,monospace; }
+  .full-drawer { border-top:1px solid #26272c; background:#17181c; padding:10px 14px; }
+  .full-drawer-head { display:flex; justify-content:space-between; margin-bottom:8px; }
+  .full-drawer-msg { font-weight:600; }
+  .full-drawer-meta { color:#6f7078; font-size:10px; margin-top:2px; }
+  .full-diff-tabs { display:flex; gap:4px; margin-bottom:6px; }
+  .full-diff-tab { padding:3px 9px; border-radius:5px; font-size:10px; background:#e8973a; color:#1a1200; }
+  .full-diff-tab.off { background:#1e1f24; color:#9a9ba3; border:1px solid #2c2d33; }
+  .full-diff-file { background:#1e1f24; border:1px solid #2c2d33; border-radius:8px; overflow:hidden; }
+  .full-diff-file-head { display:flex; justify-content:space-between; padding:5px 10px; background:#242530; font-family:ui-monospace,monospace; font-size:10px; }
+  .full-diff-body { font-family:ui-monospace,monospace; font-size:10px; padding:6px 10px; line-height:1.6; }
+  .ins { color:#4ad999; } .del { color:#f0625f; }
+</style>
+
+<div class="mockup" style="max-width:720px;margin:0 auto;">
+  <div class="full-mock">
+    <div class="full-search"><input placeholder="Search branches, tags, commits..." readonly></div>
+    <div class="full-toolbar">
+      <div class="full-btn">Fetch</div>
+      <div class="full-btn primary">Pull</div>
+      <div class="full-btn">Push</div>
+    </div>
+    <div class="full-body">
+      <div class="full-sidebar">
+        <div class="full-side-label">Repos</div>
+        <div class="full-repo">bettertree</div>
+        <div class="full-side-label">Branches</div>
+        <div class="full-branch active">● main</div>
+        <div class="full-branch rmt">origin/main</div>
+        <div class="full-side-label">Changes</div>
+        <div class="full-change-row"><span class="fname">a.txt</span><div class="full-tag-btn">Stage</div></div>
+      </div>
+      <div class="full-main">
+        <div class="full-graph">
+          <div class="full-row"><div class="full-dot"></div><span class="msg">second commit</span><span class="meta">a3f9c21 · 2h ago</span></div>
+          <div class="full-row"><div class="full-dot" style="opacity:.55;"></div><span class="msg" style="color:#9a9ba3;">first commit</span><span class="meta">1c88e0a · 1d ago</span></div>
+        </div>
+        <div class="full-drawer">
+          <div class="full-drawer-head">
+            <div>
+              <div class="full-drawer-msg">second commit</div>
+              <div class="full-drawer-meta">Test User &lt;test@example.com&gt; — 2 hours ago</div>
+            </div>
+          </div>
+          <div class="full-diff-tabs">
+            <div class="full-diff-tab">Unified</div>
+            <div class="full-diff-tab off">Side-by-side</div>
+          </div>
+          <div class="full-diff-file">
+            <div class="full-diff-file-head"><span>a.txt</span><span><span class="ins">+1</span> <span class="del">-1</span></span></div>
+            <div class="full-diff-body"><span class="del">-one</span><br><span class="ins">+two</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<p class="subtitle">Reply in terminal: looks right, or what to change (spacing, corner roundness, font, icons, etc).</p>
