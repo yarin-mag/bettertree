@@ -1,6 +1,6 @@
 {
   "productName": "Bettertree",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "identifier": "ai.cemento.bettertree",
   "build": {
     "beforeDevCommand": "npm run dev",
@@ -19,6 +19,8 @@
     ]
   },
   "bundle": {
+    "active": true,
+    "targets": "all",
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
