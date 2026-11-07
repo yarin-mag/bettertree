@@ -21,17 +21,15 @@ pub struct GraphCommit {
     pub active_lanes: Vec<bool>,
 }
 
-pub fn get_commit_graph(repo_path: &str, limit: usize) -> Result<Vec<GraphCommit>, AppError> {
-    let repo = Repository::open(repo_path)?;
-    let mut revwalk = repo.revwalk()?;
-    revwalk.push_head()?;
-    revwalk.set_sorting(Sort::TOPOLOGICAL | Sort::TIME)?;
-
+pub fn build_graph_commits(
+    repo: &Repository,
+    oids: impl Iterator<Item = Result<git2::Oid, git2::Error>>,
+) -> Result<Vec<GraphCommit>, AppError> {
     // lanes[i] holds the oid this lane is waiting to see next, or None if free.
     let mut lanes: Vec<Option<String>> = Vec::new();
     let mut out = Vec::new();
 
-    for oid_result in revwalk.take(limit) {
+    for oid_result in oids {
         let oid = oid_result?;
         let commit = repo.find_commit(oid)?;
         let oid_str = oid.to_string();
@@ -106,10 +104,61 @@ pub fn get_commit_graph(repo_path: &str, limit: usize) -> Result<Vec<GraphCommit
     Ok(out)
 }
 
+fn head_upstream_oid(repo: &Repository) -> Option<git2::Oid> {
+    let head = repo.head().ok()?;
+    if !head.is_branch() {
+        return None;
+    }
+    git2::Branch::wrap(head).upstream().ok()?.get().target()
+}
+
+pub fn get_commit_graph(repo_path: &str, limit: usize) -> Result<Vec<GraphCommit>, AppError> {
+    let repo = Repository::open(repo_path)?;
+    let mut revwalk = repo.revwalk()?;
+    revwalk.push_head()?;
+    // Also show what a fetch brought in on the current branch's upstream, so
+    // new remote commits are visible before pulling.
+    if let Some(upstream_oid) = head_upstream_oid(&repo) {
+        revwalk.push(upstream_oid)?;
+    }
+    revwalk.set_sorting(Sort::TOPOLOGICAL | Sort::TIME)?;
+    build_graph_commits(&repo, revwalk.take(limit))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_support::{init_repo_with_commits, init_repo_with_commits_and_merge};
+    use crate::test_support::{init_repo_with_commits, init_repo_with_commits_and_merge, init_repo_with_remote};
+
+    /// Pushes main, tracks origin/main, then rewinds local main one commit so
+    /// origin/main is one commit ahead (what a fetch leaves behind).
+    fn behind_upstream_by_one() -> (tempfile::TempDir, tempfile::TempDir, String, String) {
+        let (dir, bare, repo) = init_repo_with_remote();
+        let path = dir.path().to_str().unwrap().to_string();
+        let mut remote = repo.find_remote("origin").unwrap();
+        remote.push(&["refs/heads/main:refs/heads/main"], None).unwrap();
+        crate::remote::fetch(&path, "origin").unwrap();
+        repo.find_branch("main", git2::BranchType::Local).unwrap().set_upstream(Some("origin/main")).unwrap();
+        let tip = repo.head().unwrap().target().unwrap().to_string();
+        let parent = repo.head().unwrap().peel_to_commit().unwrap().parent(0).unwrap();
+        repo.reset(parent.as_object(), git2::ResetType::Hard, None).unwrap();
+        (dir, bare, path, tip)
+    }
+
+    #[test]
+    fn graph_shows_commits_fetched_ahead_of_the_current_branch() {
+        let (_dir, _bare, path, remote_tip) = behind_upstream_by_one();
+        let graph = get_commit_graph(&path, 10).unwrap();
+        assert_eq!(graph.len(), 2);
+        assert_eq!(graph[0].oid, remote_tip, "incoming upstream commit should be on top");
+    }
+
+    #[test]
+    fn graph_without_upstream_is_just_head_history() {
+        let (dir, _repo) = init_repo_with_commits();
+        let graph = get_commit_graph(dir.path().to_str().unwrap(), 10).unwrap();
+        assert_eq!(graph.len(), 2);
+    }
 
     #[test]
     fn graph_edge_serializes_with_camel_case_keys() {

@@ -3,6 +3,10 @@ export default {
   content: ["./index.html", "./src/**/*.{ts,tsx}"],
   theme: {
     extend: {
+      fontSize: {
+        xs: ["var(--font-size-xs, 0.75rem)", { lineHeight: "1rem" }],
+        sm: ["var(--font-size-sm, 0.875rem)", { lineHeight: "1.25rem" }],
+      },
       colors: {
         canvas: "var(--bg-canvas)",
         surface: "var(--bg-surface)",
@@ -18,6 +22,8 @@ export default {
         danger: "var(--danger)",
         "success-soft": "var(--success-soft-bg)",
         "danger-soft": "var(--danger-soft-bg)",
+        merged: "var(--merged)",
+        "merged-soft": "var(--merged-soft-bg)",
       },
     },
   },

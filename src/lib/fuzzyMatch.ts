@@ -8,3 +8,19 @@ export function fuzzyMatch(query: string, target: string): boolean {
   }
   return qi === q.length;
 }
+
+export function rankMatches<T>(query: string, items: T[], getText: (item: T) => string): T[] {
+  if (!query) return items;
+  const q = query.toLowerCase();
+  const substringMatches: T[] = [];
+  const fuzzyOnlyMatches: T[] = [];
+  for (const item of items) {
+    const text = getText(item);
+    if (text.toLowerCase().includes(q)) {
+      substringMatches.push(item);
+    } else if (fuzzyMatch(query, text)) {
+      fuzzyOnlyMatches.push(item);
+    }
+  }
+  return [...substringMatches, ...fuzzyOnlyMatches];
+}

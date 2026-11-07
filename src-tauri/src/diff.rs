@@ -1,7 +1,7 @@
 use crate::error::AppError;
 use git2::{Delta, Repository};
 use serde::Serialize;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::path::Path;
 
 #[derive(Debug, Clone, Serialize)]
@@ -14,6 +14,7 @@ pub struct FileDiff {
     pub new_content: Option<String>,
     pub insertions: usize,
     pub deletions: usize,
+    pub is_binary: bool,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -25,6 +26,7 @@ pub struct CommitDetail {
     pub timestamp: i64,
     pub message: String,
     pub files: Vec<FileDiff>,
+    pub parents: Vec<String>,
 }
 
 pub fn get_commit_diff(repo_path: &str, oid_str: &str) -> Result<CommitDetail, AppError> {
@@ -63,6 +65,7 @@ pub fn get_commit_diff(repo_path: &str, oid_str: &str) -> Result<CommitDetail, A
                 new_content: None,
                 insertions: 0,
                 deletions: 0,
+                is_binary: false,
             });
             true
         },
@@ -73,6 +76,7 @@ pub fn get_commit_diff(repo_path: &str, oid_str: &str) -> Result<CommitDetail, A
 
     let mut patch_texts: HashMap<String, String> = HashMap::new();
     let mut line_counts: HashMap<String, (usize, usize)> = HashMap::new();
+    let mut binary_paths: HashSet<String> = HashSet::new();
     diff.print(git2::DiffFormat::Patch, |delta, _hunk, line| {
         let path = delta
             .new_file()
@@ -81,6 +85,12 @@ pub fn get_commit_diff(repo_path: &str, oid_str: &str) -> Result<CommitDetail, A
             .map(|p| p.to_string_lossy().to_string())
             .unwrap_or_default();
         let origin = line.origin();
+        // git emits a single 'B' line ("Binary files ... differ") for binary
+        // deltas; flag the file instead of putting that text in the patch.
+        if origin == 'B' {
+            binary_paths.insert(path);
+            return true;
+        }
         if let Ok(s) = std::str::from_utf8(line.content()) {
             let entry = patch_texts.entry(path.clone()).or_default();
             if matches!(origin, '+' | '-' | ' ') {
@@ -100,6 +110,7 @@ pub fn get_commit_diff(repo_path: &str, oid_str: &str) -> Result<CommitDetail, A
     for file in &mut files {
         file.patch = patch_texts.get(&file.path).cloned().unwrap_or_default();
         let (insertions, deletions) = line_counts.get(&file.path).copied().unwrap_or((0, 0));
+        file.is_binary = binary_paths.contains(&file.path);
         file.insertions = insertions;
         file.deletions = deletions;
         file.old_content = parent_tree
@@ -115,6 +126,7 @@ pub fn get_commit_diff(repo_path: &str, oid_str: &str) -> Result<CommitDetail, A
     }
 
     let author = commit.author();
+    let parents = commit.parent_ids().map(|id| id.to_string()).collect();
     Ok(CommitDetail {
         oid: oid_str.to_string(),
         author: author.name().unwrap_or("").to_string(),
@@ -122,6 +134,7 @@ pub fn get_commit_diff(repo_path: &str, oid_str: &str) -> Result<CommitDetail, A
         timestamp: commit.time().seconds(),
         message: commit.message().unwrap_or("").to_string(),
         files,
+        parents,
     })
 }
 
@@ -140,10 +153,30 @@ mod tests {
             new_content: Some("two".into()),
             insertions: 1,
             deletions: 1,
+            is_binary: false,
         };
         let json = serde_json::to_string(&fd).unwrap();
         assert!(json.contains("\"oldContent\""), "json was: {json}");
         assert!(json.contains("\"newContent\""), "json was: {json}");
+        assert!(json.contains("\"isBinary\""), "json was: {json}");
+    }
+
+    #[test]
+    fn flags_binary_files__without_hunks() {
+        let (dir, repo) = init_repo_with_commits();
+        std::fs::write(dir.path().join("img.bin"), [0u8, 1, 2, 0, 255, 0, 7]).unwrap();
+        let mut index = repo.index().unwrap();
+        index.add_path(Path::new("img.bin")).unwrap();
+        index.write().unwrap();
+        let tree = repo.find_tree(index.write_tree().unwrap()).unwrap();
+        let sig = git2::Signature::now("t", "t@t").unwrap();
+        let parent = repo.head().unwrap().peel_to_commit().unwrap();
+        let oid = repo.commit(Some("HEAD"), &sig, &sig, "bin", &tree, &[&parent]).unwrap();
+
+        let detail = get_commit_diff(dir.path().to_str().unwrap(), &oid.to_string()).unwrap();
+        let f = detail.files.iter().find(|f| f.path == "img.bin").unwrap();
+        assert!(f.is_binary);
+        assert!(!f.patch.contains("@@"));
     }
 
     #[test]
@@ -163,6 +196,7 @@ mod tests {
         assert!(detail.files[0].patch.contains("+two"));
         assert_eq!(detail.files[0].insertions, 1);
         assert_eq!(detail.files[0].deletions, 1);
+        assert_eq!(detail.parents.len(), 1);
     }
 
     #[test]
@@ -179,5 +213,6 @@ mod tests {
         assert_eq!(detail.files[0].new_content.as_deref(), Some("one"));
         assert_eq!(detail.files[0].insertions, 1);
         assert_eq!(detail.files[0].deletions, 0);
+        assert_eq!(detail.parents.len(), 0);
     }
 }

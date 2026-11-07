@@ -14,6 +14,10 @@ pub enum AppError {
     NoDataDir,
     #[error("{0}")]
     Operation(String),
+    /// Checkout blocked by uncommitted changes. Serialized with a code so the
+    /// UI can offer stash/discard/worktree instead of just showing the text.
+    #[error("{0}")]
+    DirtyWorkdir(String),
 }
 
 impl Serialize for AppError {
@@ -21,6 +25,15 @@ impl Serialize for AppError {
     where
         S: serde::Serializer,
     {
-        serializer.serialize_str(&self.to_string())
+        match self {
+            AppError::DirtyWorkdir(message) => {
+                use serde::ser::SerializeMap;
+                let mut map = serializer.serialize_map(Some(2))?;
+                map.serialize_entry("code", "dirty_workdir")?;
+                map.serialize_entry("message", message)?;
+                map.end()
+            }
+            _ => serializer.serialize_str(&self.to_string()),
+        }
     }
 }

@@ -92,6 +92,7 @@ pub fn get_working_diff(repo_path: &str, file_path: &str, staged: bool) -> Resul
                 new_content: None,
                 insertions: 0,
                 deletions: 0,
+                is_binary: false,
             });
             true
         },
